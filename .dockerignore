@@ -18,6 +18,7 @@ venv/
 
 desktop.ini
 
+.github/
 requirements-dev.txt
 .git
 .gitignore
