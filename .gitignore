@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.pyo
+
+*.env
+.env
+
+*.tmp
+
+lifecycle/
+
+.pytest_cache/
+venv/
+
+desktop.ini
