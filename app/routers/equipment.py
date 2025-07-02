@@ -13,7 +13,7 @@ router = APIRouter()
 @router.post(
         '', 
         status_code=status.HTTP_201_CREATED, 
-        response_model=EquipmentCreate,
+        response_model=EquipmentOut,
         summary="Добавить оборудование",
         description="Добавляет оборудование. Оборудование привязывается к авторизованному пользователю",
         responses={
