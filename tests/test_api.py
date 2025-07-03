@@ -3,63 +3,65 @@ import pytest
 from httpx import AsyncClient
 import io
 
+#Тесты auth.py
 @pytest.mark.asyncio
 async def test_register(client: AsyncClient):
     response = await client.post(
         '/register',
-        json={"username": "Apollo", "password": "suck"}
+        json={"username": "Apollo", "password": "123"}
     )
     await client.post(
         '/register',
-        json={"username": "Adminollo", "password": "crack"}
+        json={"username": "Adminollo", "password": "456"}
     )
     await client.post(
         '/register',
-        json={"username": "Noownerollo", "password": "kick"}
+        json={"username": "Noownerollo", "password": "789"}
     )
     assert response.status_code == 201
 
 @pytest.mark.asyncio
-async def test_auth_2_n_7(client: AsyncClient):
+async def test_login_n_logout(client: AsyncClient):
     response = await client.post(
         '/login',
-        json={"username": "Apollo", "password": "suck"}
+        json={"username": "Apollo", "password": "123"}
     )
     assert len(response.cookies) == 1
     response = await client.post('/logout')
     assert len(response.cookies) == 0
 
 @pytest.mark.asyncio
-async def test_auth_3(authorized_client: AsyncClient):
+async def test_me(authorized_client: AsyncClient):
     response = await authorized_client.get('/me')
     assert response.status_code == 200
 
 @pytest.mark.asyncio
-async def test_auth_4(client: AsyncClient):
+async def test_unauthorized_me(client: AsyncClient):
     response = await client.get('/me')
     assert response.status_code == 401
 
 @pytest.mark.asyncio
-async def test_auth_5(client: AsyncClient):
+async def test_invalid_password(client: AsyncClient):
     response = await client.post(
         '/login',
-        json={"username": "Apollo", "password": "fuck"}
+        json={"username": "Apollo", "password": "000"}
     )
     assert response.status_code == 401
 
+# Тесты admin.py
 @pytest.mark.asyncio
-async def test_admin_1(admin_client: AsyncClient):
+async def test_promote_to_admin(admin_client: AsyncClient):
     response = await admin_client.put(
         '/admin/promote-to-admin/2',
-        json={"password": "adminpass"}
+        json={"password": "root_pass"}
     )
     assert response.status_code == 200
 
 @pytest.mark.asyncio
-async def test_admin_2_n_category_1(admin_client: AsyncClient):
+async def test_add_category_from_admin(admin_client: AsyncClient):
     response = await admin_client.post(
         '/categories',
-        json={"title": "Секс-игрушки"}
+        json={"title": "Бытовые приборы"}
     )
     await admin_client.post(
         '/categories',
@@ -68,31 +70,32 @@ async def test_admin_2_n_category_1(admin_client: AsyncClient):
     assert response.status_code == 201
 
 @pytest.mark.asyncio
-async def test_admin_3(authorized_client: AsyncClient):
+async def test_add_category_from_user(authorized_client: AsyncClient):
     response = await authorized_client.post(
         '/categories',
         json={"title": "Детские игрушки"}
     )
     assert response.status_code == 403
 
+#Тесты categories.py
 @pytest.mark.asyncio
-async def test_category_2(authorized_client: AsyncClient):
+async def test_get_categories(authorized_client: AsyncClient):
     response = await authorized_client.get(
         '/categories'
     )
     data = response.json()
-    assert data[0]["title"] == "Секс-игрушки"
+    assert data[0]["title"] == "Бытовые приборы"
 
 @pytest.mark.asyncio
-async def test_category_3(authorized_client: AsyncClient):
+async def test_get_category(authorized_client: AsyncClient):
     response = await authorized_client.get(
         '/categories/1'
     )
     data = response.json()
-    assert data["title"] == "Секс-игрушки"
+    assert data["title"] == "Бытовые приборы"
 
 @pytest.mark.asyncio
-async def test_category_4(admin_client: AsyncClient):
+async def test_update_category(admin_client: AsyncClient):
     response = await admin_client.put(
         '/categories/1',
         json={'title': 'Просто игрушки'}
@@ -101,14 +104,15 @@ async def test_category_4(admin_client: AsyncClient):
     assert data["title"] == "Просто игрушки"
 
 @pytest.mark.asyncio
-async def test_category_5(admin_client: AsyncClient):
+async def test_delete_category(admin_client: AsyncClient):
     response = await admin_client.delete(
         '/categories/1',
     )
     assert response.status_code == 204
 
+#Тесты equipment.py
 @pytest.mark.asyncio
-async def test_equipment_1(authorized_client: AsyncClient):
+async def test_add_equipment(authorized_client: AsyncClient):
     response = await authorized_client.post(
         '/equipment',
         json={
@@ -139,14 +143,14 @@ async def test_equipment_1(authorized_client: AsyncClient):
     assert response.status_code == 201
 
 @pytest.mark.asyncio
-async def test_category_6(admin_client: AsyncClient):
+async def test_delete_category_with_equipment(admin_client: AsyncClient):
     response = await admin_client.delete(
         '/categories/2'
     )
     assert response.status_code == 409
 
 @pytest.mark.asyncio
-async def test_equipment_2(authorized_client: AsyncClient):
+async def test_get_list_of_equipment(authorized_client: AsyncClient):
     response = await authorized_client.get(
         '/equipment'
     )
@@ -154,7 +158,7 @@ async def test_equipment_2(authorized_client: AsyncClient):
     assert isinstance(data, list)
 
 @pytest.mark.asyncio
-async def test_equipment_3(authorized_client: AsyncClient):
+async def test_get_equipment(authorized_client: AsyncClient):
     response = await authorized_client.get(
         '/equipment/1'
     )
@@ -162,7 +166,7 @@ async def test_equipment_3(authorized_client: AsyncClient):
     assert isinstance(data, dict)
 
 @pytest.mark.asyncio
-async def test_equipment_4(authorized_client: AsyncClient):
+async def test_update_equipment(authorized_client: AsyncClient):
     response = await authorized_client.put(
         '/equipment/1',
         json={'price_per_day': 250}
@@ -171,16 +175,17 @@ async def test_equipment_4(authorized_client: AsyncClient):
     assert data['price_per_day'] == '250.00'
 
 @pytest.mark.asyncio
-async def test_equipment_5(authorized_client: AsyncClient):
+async def test_delete_equipment(authorized_client: AsyncClient):
     response = await authorized_client.delete(
         '/equipment/1'
     )
     assert response.status_code == 204
 
-file = io.BytesIO(b"hahaha")
+#Тесты photos.py
+file = io.BytesIO(b"image")
 
 @pytest.mark.asyncio
-async def test_photo_1(authorized_client: AsyncClient):
+async def test_add_photo(authorized_client: AsyncClient):
     response = await authorized_client.post(
         '/equipment/2/photos',
         files={"file": ("iluha_mad", file, "image/jpeg")}
@@ -189,7 +194,7 @@ async def test_photo_1(authorized_client: AsyncClient):
     assert response.status_code == 201
 
 @pytest.mark.asyncio
-async def test_photo_2(authorized_client: AsyncClient):
+async def test_get_photo(authorized_client: AsyncClient):
     response = await authorized_client.get(
         '/equipment/2/photos/1'
     )
@@ -201,7 +206,7 @@ async def test_photo_2(authorized_client: AsyncClient):
     assert response.content == file.getvalue()
 
 @pytest.mark.asyncio
-async def test_photo_3(authorized_client:AsyncClient):
+async def test_update_photo(authorized_client:AsyncClient):
     new_file = io.BytesIO(b"haha")
     await authorized_client.put(
         '/equipment/2/photos/1/content',
@@ -213,14 +218,14 @@ async def test_photo_3(authorized_client:AsyncClient):
     assert response.content == new_file.getvalue()
 
 @pytest.mark.asyncio
-async def test_photo_4(authorized_client: AsyncClient):
+async def test_delete_photo(authorized_client: AsyncClient):
     response = await authorized_client.delete(
         '/equipment/2/photos/1'
     )
     assert response.status_code == 204
 
 @pytest.mark.asyncio
-async def test_photo_5(authorized_client: AsyncClient):
+async def test_add_photo_with_bigsize(authorized_client: AsyncClient):
     useless_file = io.BytesIO(b"x" * (2 * 1024 * 1024 + 1))
     response = await authorized_client.post(
         '/equipment/2/photos',
@@ -228,8 +233,9 @@ async def test_photo_5(authorized_client: AsyncClient):
     )
     assert response.status_code == 413
 
+#Тесты orders.py
 @pytest.mark.asyncio
-async def test_order_1(authorized_client_2: AsyncClient):
+async def test_add_order(authorized_client_2: AsyncClient):
     response = await authorized_client_2.post(
         '/orders?equipment_id=2',
         json={
@@ -240,7 +246,7 @@ async def test_order_1(authorized_client_2: AsyncClient):
     assert response.status_code == 201
 
 @pytest.mark.asyncio
-async def test_order_2(authorized_client: AsyncClient):
+async def test_add_order_own_equipment(authorized_client: AsyncClient):
     response = await authorized_client.post(
         '/orders?equipment_id=3',
         json={
@@ -251,18 +257,7 @@ async def test_order_2(authorized_client: AsyncClient):
     assert response.status_code == 403
 
 @pytest.mark.asyncio
-async def test_order_3(authorized_client_2: AsyncClient):
-    response = await authorized_client_2.post(
-        '/orders?equipment_id=2',
-        json={
-            "start_date": "2025-06-17", 
-            "end_date": "2025-06-22"
-        }        
-    )
-    assert response.status_code == 201
-
-@pytest.mark.asyncio
-async def test_order_4(authorized_client_2: AsyncClient):
+async def test_get_orders(authorized_client_2: AsyncClient):
     response = await authorized_client_2.get(
         '/orders'
     )
@@ -270,14 +265,14 @@ async def test_order_4(authorized_client_2: AsyncClient):
     assert isinstance(data, list)
 
 @pytest.mark.asyncio
-async def test_order_5(client: AsyncClient):
+async def test_get_orders_from_noncustomer(client: AsyncClient):
     await client.post(
         '/register',
-        json={"username": "hooba", "password": "booba"}
+        json={"username": "Alex", "password": "134"}
     )
     await client.post(
         '/login',
-        json={"username": "hooba", "password": "booba"}
+        json={"username": "Alex", "password": "134"}
     )
     response = await client.get(
         '/orders/1'
@@ -286,34 +281,35 @@ async def test_order_5(client: AsyncClient):
     assert response.status_code == 403
 
 @pytest.mark.asyncio
-async def test_order_7(authorized_client: AsyncClient):
+async def test_delete_order_from_noncustomer(authorized_client: AsyncClient):
     response = await authorized_client.delete(
         '/orders/1'
     )
     assert response.status_code == 403
 
 @pytest.mark.asyncio
-async def test_order_6(authorized_client_2: AsyncClient):
+async def test_delete_order(authorized_client_2: AsyncClient):
     response = await authorized_client_2.delete(
         '/orders/1'
     )
     assert response.status_code == 204
 
+#Тесты валидации pydantic
 @pytest.mark.asyncio
-async def test_valid_data_1(client: AsyncClient):
+async def test_non_empty_data(client: AsyncClient):
     response = await client.post(
         '/register',
-        json={"username": "  ", "password": "sucker"}
+        json={"username": "  ", "password": "?"}
     )
     assert response.status_code == 422
 
 @pytest.mark.asyncio
-async def test_valid_data_2(authorized_client: AsyncClient):
+async def test_type_exception(authorized_client: AsyncClient):
     response = await authorized_client.post(
         '/equipment',
         json={
             "title": "Хехе",
-            "description": "Котенок из мемом, ехидно смеющийся",
+            "description": "Котенок из мемов, ехидно смеющийся",
             "price_per_day": "Математика неспособна отразить всю ценность этой вещи",
             "category_id": 2
         }
@@ -321,15 +317,15 @@ async def test_valid_data_2(authorized_client: AsyncClient):
     assert response.status_code == 422
 
 @pytest.mark.asyncio
-async def test_valid_data_3(client: AsyncClient):
+async def test_incomplete_response(client: AsyncClient):
     response = await client.post(
         '/login',
-        json={"password": "sucker"}
+        json={"password": "134"}
     )
     assert response.status_code == 422
 
 @pytest.mark.asyncio
-async def test_valid_data_4(authorized_client_2: AsyncClient):
+async def test_end_date_validate(authorized_client_2: AsyncClient):
     response = await authorized_client_2.post(
         '/orders?equipment_id=3',
         json={
