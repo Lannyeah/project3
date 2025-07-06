@@ -7,7 +7,7 @@ on:
     pull_request: {}
 
 jobs:
-  say-hello:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
