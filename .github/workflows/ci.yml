@@ -1,4 +1,4 @@
-name: Basic CI
+name: NonBasic CI
 
 on:
   push:
