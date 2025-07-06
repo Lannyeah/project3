@@ -3,6 +3,10 @@ import pytest
 from httpx import AsyncClient
 import io
 
+from dotenv import load_dotenv
+import os
+
+
 #Тесты auth.py
 @pytest.mark.asyncio
 async def test_register(client: AsyncClient):
@@ -49,11 +53,13 @@ async def test_invalid_password(client: AsyncClient):
     assert response.status_code == 401
 
 # Тесты admin.py
+load_dotenv()
+root_pass = os.getenv("ROOT_PASSWORD")
 @pytest.mark.asyncio
 async def test_promote_to_admin(admin_client: AsyncClient):
     response = await admin_client.put(
         '/admin/promote-to-admin/2',
-        json={"password": "root_pass"}
+        json={"password": root_pass}
     )
     assert response.status_code == 200
 
@@ -84,7 +90,7 @@ async def test_get_categories(authorized_client: AsyncClient):
         '/categories'
     )
     data = response.json()
-    assert data[0]["title"] == "Бытовые приборы"
+    assert data[0]["title"] == "Надувные игрушки"
 
 @pytest.mark.asyncio
 async def test_get_category(authorized_client: AsyncClient):
