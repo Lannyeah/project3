@@ -1,9 +1,7 @@
 name: Basic CI
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
   say-hello:
