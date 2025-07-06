@@ -1,14 +1,11 @@
-name: NonBasic CI
+name: Basic CI
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch
 
 jobs:
   say-hello:
     runs-on: ubuntu-latest
     steps:
-
       - name: Say hello
-        run: echo "Привет, GitHub Actions работает!!"
+        run: echo "Привет, GitHub Actions работает!"
