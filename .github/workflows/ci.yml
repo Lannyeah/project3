@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-    pull_request: {}
+  pull_request: {}
 
 jobs:
   test:
@@ -26,6 +26,7 @@ jobs:
       - name: Create .env file
         run: |
           echo "ROOT_PASSWORD=${{ secrets.ROOT_PASSWORD }}" >> .env
+          echo "DATABASE_URL=sqlite+aoisqlite:///:memory:" >> .env
         
       - name: Run tests with pytest
         run: pytest
