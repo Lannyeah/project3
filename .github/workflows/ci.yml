@@ -26,7 +26,7 @@ jobs:
       - name: Create .env file
         run: |
           echo "ROOT_PASSWORD=${{ secrets.ROOT_PASSWORD }}" >> .env
-          echo "DATABASE_URL=sqlite+aoisqlite:///:memory:" >> .env
+          echo "DATABASE_URL=sqlite+aiosqlite:///:memory:" >> .env
         
       - name: Run tests with pytest
         run: pytest
