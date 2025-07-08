@@ -56,11 +56,12 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
-        compare_server_default=True
+        compare_server_default=True,
     )
 
     with context.begin_transaction():
         context.run_migrations()
+
 
 def do_run_migrations(connection):
     context.configure(
@@ -72,6 +73,7 @@ def do_run_migrations(connection):
     with context.begin_transaction():
         context.run_migrations()
 
+
 async def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -81,7 +83,7 @@ async def run_migrations_online() -> None:
     """
     section = config.get_section(config.config_ini_section) or {}
     connectable = async_engine_from_config(
-    section,
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
@@ -90,6 +92,7 @@ async def run_migrations_online() -> None:
         await async_conn.run_sync(do_run_migrations)
 
     await connectable.dispose()
+
 
 if context.is_offline_mode():
     run_migrations_offline()
