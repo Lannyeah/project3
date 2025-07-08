@@ -1,4 +1,3 @@
-from app.database import engine
 
 
 #async def __init_models__(): #Ручное создание таблиц без миграций

@@ -1,12 +1,11 @@
-from fastapi import FastAPI
-
-from app.routers import auth, admin, categories, equipment, photos, orders
-from app.exceptions import handle_integrity_error, handle_sqlalchemy_error
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-
-from dotenv import load_dotenv
 import os
 
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+from app.exceptions import handle_integrity_error, handle_sqlalchemy_error
+from app.routers import admin, auth, categories, equipment, orders, photos
 
 load_dotenv()
 

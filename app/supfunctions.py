@@ -1,10 +1,10 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Cookie, Depends, HTTPException, Path, status
 from sqlalchemy import select
-
-from fastapi import HTTPException, status, Cookie, Depends, Path, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
-from app.models import User, Session, Equipment
+from app.models import Equipment, Session, User
+
 
 async def get_current_user(
         session_id: str = Cookie(None),

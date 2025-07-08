@@ -1,10 +1,9 @@
-import pytest
-
-from httpx import AsyncClient
 import io
-
-from dotenv import load_dotenv
 import os
+
+import pytest
+from dotenv import load_dotenv
+from httpx import AsyncClient
 
 
 #Тесты auth.py
@@ -122,7 +121,7 @@ async def test_add_equipment(authorized_client: AsyncClient):
     response = await authorized_client.post(
         '/equipment',
         json={
-            'title': 'Пикачу', 
+            'title': 'Пикачу',
             'description': 'Надувная игрушка Пикачу. Веселая.',
             'price_per_day': 100,
             'category_id': 2
@@ -245,7 +244,7 @@ async def test_add_order(authorized_client_2: AsyncClient):
     response = await authorized_client_2.post(
         '/orders?equipment_id=2',
         json={
-            "start_date": "2025-06-17", 
+            "start_date": "2025-06-17",
             "end_date": "2025-06-22"
         }
     )

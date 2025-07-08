@@ -1,16 +1,14 @@
-from fastapi import APIRouter, status, Depends, HTTPException, Body, Path
+import os
 
-from sqlalchemy.ext.asyncio import AsyncSession
+import bcrypt
+from dotenv import load_dotenv
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
 from app.models import User
-from app.schemas import UserOut, PromoteRequest
-
-import bcrypt
-import os
-from dotenv import load_dotenv
-
+from app.schemas import PromoteRequest, UserOut
 
 router = APIRouter()
 
@@ -21,8 +19,8 @@ if not root_password:
 hashed_root_password = bcrypt.hashpw(root_password.encode(), bcrypt.gensalt())
 
 @router.put(
-        '/promote-to-admin/{user_id}', 
-        status_code=status.HTTP_200_OK, 
+        '/promote-to-admin/{user_id}',
+        status_code=status.HTTP_200_OK,
         response_model=UserOut,
         summary="Выдать роль администратора",
         description="Изменяет роль пользователя на администратора. Требуется рут-пароль",

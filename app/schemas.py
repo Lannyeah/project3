@@ -1,7 +1,9 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from collections.abc import Callable
+from datetime import UTC, datetime
 from decimal import Decimal
-from datetime import datetime, UTC
-from typing import Callable
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 
 def non_empty_validator(field_name: str) -> Callable[[type[BaseModel], str], str]:
     @field_validator(field_name)
@@ -39,7 +41,7 @@ class EquipmentCreate(BaseModel):
 
     _validate_title = non_empty_validator("title")
     _validate_description = non_empty_validator("description")
-    
+
     @field_validator("price_per_day")
     def validate_price_per_day(cls, v: Decimal) -> Decimal:
         field_title = cls.__pydantic_fields__["price_per_day"].title or "price_per_day"
@@ -109,7 +111,7 @@ class OrderCreate(BaseModel):
         if start_date and end_date <= start_date:
             raise ValueError("end_date must be after start_date")
         return end_date
-    
+
 class OrderOut(BaseModel):
     id: int = Field(..., title="ID заказа")
     customer_id: int = Field(..., title="ID заказчика")

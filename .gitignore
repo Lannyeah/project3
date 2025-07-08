@@ -10,6 +10,8 @@ __pycache__/
 lifecycle/
 
 .pytest_cache/
+.ruff_cache/
 venv/
+venv_new/
 
 desktop.ini

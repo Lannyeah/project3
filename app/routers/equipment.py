@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body, Query
-
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from sqlalchemy import asc, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc, asc
 
 from app.database import get_session
-from app.models import User, Equipment
+from app.models import Equipment, User
 from app.schemas import EquipmentCreate, EquipmentOut, EquipmentUpdate
 from app.supfunctions import get_current_user, get_equipment, get_owner, sortdict
 
 router = APIRouter()
 
 @router.post(
-        '', 
-        status_code=status.HTTP_201_CREATED, 
+        '',
+        status_code=status.HTTP_201_CREATED,
         response_model=EquipmentOut,
         summary="Добавить оборудование",
         description="Добавляет оборудование. Оборудование привязывается к авторизованному пользователю",
@@ -30,7 +29,7 @@ async def create_equipment(
     session: AsyncSession = Depends(get_session)
 ) -> EquipmentOut:
     equipment = Equipment(
-        **equipment_in.model_dump(exclude_unset=True), 
+        **equipment_in.model_dump(exclude_unset=True),
         owner_id=current_user.id
         )
     session.add(equipment)
@@ -43,8 +42,8 @@ async def create_equipment(
     return EquipmentOut.model_validate(equipment)
 
 @router.get(
-        '', 
-        status_code=status.HTTP_200_OK, 
+        '',
+        status_code=status.HTTP_200_OK,
         response_model=list[EquipmentOut],
         summary="Вывести список оборудования",
         description="Возвращает список оборудования",
@@ -79,8 +78,8 @@ async def get_list_of_equipment(
     return [EquipmentOut.model_validate(equipment) for equipment in equipment_list]
 
 @router.get(
-        '/{equipment_id}', 
-        status_code=status.HTTP_200_OK, 
+        '/{equipment_id}',
+        status_code=status.HTTP_200_OK,
         response_model=EquipmentOut,
         summary="Найти оборудование по ID",
         description="Возвращает оборудование по его ID",
@@ -98,8 +97,8 @@ async def get_equipment_full(
     return EquipmentOut.model_validate(equipment)
 
 @router.put(
-        '/{equipment_id}', 
-        status_code=status.HTTP_200_OK, 
+        '/{equipment_id}',
+        status_code=status.HTTP_200_OK,
         response_model=EquipmentOut,
         summary="Редактировать данные об оборудовании",
         description="Редактирование данных об оборудовании. Доступно владельцам оборудования",
@@ -111,7 +110,7 @@ async def get_equipment_full(
             404: {"description": "Оборудование не найдено"},
             409: {"description": "Некорректная вставка данных в БД"},
             422: {"description": "Ошибка валидации данных"},
-            500: {"description": "Ошибка со стороны сервера"}            
+            500: {"description": "Ошибка со стороны сервера"}
         }
 )
 async def update_equipment(
@@ -137,7 +136,7 @@ async def update_equipment(
     return EquipmentOut.model_validate(equipment)
 
 @router.delete(
-        '/{equipment_id}', 
+        '/{equipment_id}',
         status_code=status.HTTP_204_NO_CONTENT,
         summary="Удалить оборудование",
         description="Удаляет оборудование. Доступно владельцам. Оборудование нельзя удалить, если оно в действующем заказе",
@@ -148,7 +147,7 @@ async def update_equipment(
             404: {"description": "Оборудование не найдено"},
             409: {"description": "Вы не можете удалить арендованное оборудование"},
             422: {"description": "Ошибка валидации данных"},
-            500: {"description": "Ошибка со стороны сервера"}   
+            500: {"description": "Ошибка со стороны сервера"}
         }
 )
 async def delete_equipment(
@@ -156,7 +155,7 @@ async def delete_equipment(
     equipment: Equipment = Depends(get_equipment),
     session: AsyncSession = Depends(get_session)
 ):
-    if equipment.is_available == False:
+    if not equipment.is_available:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Вы не можете удалить арендованное оборудование"

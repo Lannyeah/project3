@@ -1,6 +1,7 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
+
 async def handle_integrity_error(request: Request, exc: Exception):
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,

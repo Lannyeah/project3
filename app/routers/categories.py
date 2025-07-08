@@ -1,14 +1,17 @@
-from fastapi import APIRouter, status, Depends, HTTPException, Query, Body, Path
-
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
+from sqlalchemy import asc, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select, desc, asc
 
 from app.database import get_session
-from app.models import User, Category, Equipment
-from app.schemas import CategoryCreate, CategoryOutSimple, CategoryOutFull, EquipmentOutbyCategory
+from app.models import Category, Equipment, User
+from app.schemas import (
+    CategoryCreate,
+    CategoryOutFull,
+    CategoryOutSimple,
+    EquipmentOutbyCategory,
+)
 from app.supfunctions import get_current_admin, get_current_user, sortdict
-
 
 router = APIRouter()
 
@@ -28,8 +31,8 @@ async def get_category(
     return category
 
 @router.post(
-        '', 
-        status_code=status.HTTP_201_CREATED, 
+        '',
+        status_code=status.HTTP_201_CREATED,
         response_model=CategoryOutSimple,
         summary="Создать новую категорию",
         description="Создание новой категории. Доступно только администраторам",
@@ -58,8 +61,8 @@ async def add_category(
     return CategoryOutSimple.model_validate(category)
 
 @router.get(
-        '', 
-        status_code=status.HTTP_200_OK, 
+        '',
+        status_code=status.HTTP_200_OK,
         response_model=list[CategoryOutSimple],
         summary="Вывести список категорий",
         description="Возвращает список по настраиваемым параметрам поиска",
@@ -96,8 +99,8 @@ async def get_categories(
     return [CategoryOutSimple.model_validate(category) for category in categories]
 
 @router.get(
-        '/{category_id}', 
-        status_code=status.HTTP_200_OK, 
+        '/{category_id}',
+        status_code=status.HTTP_200_OK,
         response_model=CategoryOutFull,
         summary="Поиск категории по ID",
         description="Возвращает категорию с оборудованием по введеному ID категории",
@@ -121,8 +124,8 @@ async def get_category_with_equipment(
     return CategoryOutFull.model_validate(category_full)
 
 @router.get(
-        '/{category_id}/', 
-        status_code=status.HTTP_200_OK, 
+        '/{category_id}/',
+        status_code=status.HTTP_200_OK,
         response_model=list[EquipmentOutbyCategory],
         summary="Вывести список оборудования, входящему в категорию по введенному ID",
         description="Выводит список оборудования, относящийся к категории с введенным ID. Возвращаются объекты оборудования, а не категория",
@@ -158,11 +161,11 @@ async def get_equipment_by_category(
             .offset(offset)
         )
     ).all()
-    return [EquipmentOutbyCategory.model_validate(equipment) for equipment in equipment_list]  
+    return [EquipmentOutbyCategory.model_validate(equipment) for equipment in equipment_list]
 
 @router.put(
-        '/{category_id}', 
-        status_code=status.HTTP_200_OK, 
+        '/{category_id}',
+        status_code=status.HTTP_200_OK,
         response_model=CategoryOutSimple,
         summary="Обновить категорию",
         description="Обновляет изменяемые параметры категории. Доступна только администраторам",
@@ -193,7 +196,7 @@ async def update_category(
     return CategoryOutSimple.model_validate(category)
 
 @router.delete(
-        '/{category_id}', 
+        '/{category_id}',
         status_code=status.HTTP_204_NO_CONTENT,
         summary="Удалить категорию",
         description="Удаляет категорию. Категорию нельзя удалить, если ей принадлежит хотя бы одно оборудование. Доступно только администраторам",
@@ -204,7 +207,7 @@ async def update_category(
             404: {"description": "Категория не найдена"},
             409: {"description": "Категория не может быть удалена, если к ней относится оборудование"},
             422: {"description": "Ошибка валидации данных"},
-            500: {"description": "Ошибка со стороны сервера"}            
+            500: {"description": "Ошибка со стороны сервера"}
         }
 )
 async def delete_category(

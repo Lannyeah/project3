@@ -1,7 +1,18 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import MetaData, String, Integer, Boolean, LargeBinary, Numeric, DateTime, ForeignKey, text
+from datetime import UTC, datetime
 from decimal import Decimal
-from datetime import datetime, UTC
+
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    MetaData,
+    Numeric,
+    String,
+    text,
+)
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 naming_convention = {
     "pk": "pk_%(table_name)s",
@@ -83,7 +94,7 @@ class Photo(Base):
         nullable=False,
         index=True
     )
-    
+
     equipment: Mapped[Equipment] = relationship(
         "Equipment",
         back_populates="photos"

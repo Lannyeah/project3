@@ -1,14 +1,11 @@
 import pytest
-
-from fastapi import FastAPI, Response
-
-from httpx import AsyncClient, ASGITransport
+from fastapi import FastAPI
+from httpx import ASGITransport, AsyncClient
 
 from app import app
 from app.database import get_session
 from app.models import Base
-
-from tests.db_test import engine_test, Async_Session_Test
+from tests.db_test import Async_Session_Test, engine_test
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -39,7 +36,7 @@ async def test_app(async_session):
 @pytest.fixture
 async def client(test_app: FastAPI):
     async with AsyncClient(
-        transport=ASGITransport(app=test_app), 
+        transport=ASGITransport(app=test_app),
         base_url="http://test"
     ) as ac:
         yield ac

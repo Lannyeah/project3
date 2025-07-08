@@ -1,14 +1,22 @@
-from fastapi import APIRouter, status, UploadFile, File, Depends, HTTPException, Response, Path
+from io import BytesIO
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Path,
+    Response,
+    UploadFile,
+    status,
+)
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
-from app.models import User, Photo
+from app.models import Photo, User
 from app.schemas import PhotoOut
 from app.supfunctions import get_owner
-
-from io import BytesIO
 
 router = APIRouter()
 
@@ -44,8 +52,8 @@ async def upload_photo(
     return (buffer.getvalue(), file.filename or "unnamed.jpg") #Добавить логгер на случай отсутствия файлнейма
 
 @router.post(
-        '', 
-        status_code=status.HTTP_201_CREATED, 
+        '',
+        status_code=status.HTTP_201_CREATED,
         response_model=PhotoOut,
         summary="Добавить фото",
         description="Добавляет приложение к оборудованию в формате картинки. Доступно только владельцу оборудования",
@@ -57,7 +65,7 @@ async def upload_photo(
             409: {"description": "Некорректная вставка данных в БД"},
             413: {"description": "Размер файла не должен превышать 2 МБ"},
             422: {"description": "Ошибка валидации данных"},
-            500: {"description": "Ошибка со стороны сервера"}    
+            500: {"description": "Ошибка со стороны сервера"}
         }
 )
 async def add_photo(
@@ -78,7 +86,7 @@ async def add_photo(
     return PhotoOut.model_validate(photo)
 
 @router.get(
-        '/{photo_id}', 
+        '/{photo_id}',
         response_model=PhotoOut,
         summary="Найти данные приложенного фото по ID",
         description="Выводит данные о приложенной фотографии по ID. Доступно только владельцу оборудования",
@@ -132,7 +140,7 @@ async def get_photo_content(
             409: {"description": "Некорректная вставка данных в БД"},
             413: {"description": "Размер файла не должен превышать 2 МБ"},
             422: {"description": "Ошибка валидации данных"},
-            500: {"description": "Ошибка со стороны сервера"}              
+            500: {"description": "Ошибка со стороны сервера"}
         }
 )
 async def update_photo(

@@ -1,14 +1,12 @@
-from fastapi import APIRouter, status, Depends, HTTPException, Body, Path, Query
-
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select
 
 from app.database import get_session
-from app.models import Order, Equipment, User
-from app.schemas import OrderOut, OrderCreate, OrderOutFull
+from app.models import Equipment, Order, User
+from app.schemas import OrderCreate, OrderOut, OrderOutFull
 from app.supfunctions import get_current_user
-
 
 router = APIRouter()
 
@@ -35,8 +33,8 @@ async def get_order(
     return order
 
 @router.post(
-        '', 
-        status_code=status.HTTP_201_CREATED, 
+        '',
+        status_code=status.HTTP_201_CREATED,
         response_model=OrderOut,
         summary="Сделать заказ",
         description="Создает заказ. Нельзя арендовать свое оборудование и оборудование, что уже арендовано",
@@ -70,14 +68,14 @@ async def make_order(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Вы не можете арендовать свое оборудование"
         )
-    if equipment.is_available == False:
+    if not equipment.is_available:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Оборудование уже арендовано"
         )
     order = Order(
-        **order_in.model_dump(exclude_unset=True), 
-        customer_id=user.id, 
+        **order_in.model_dump(exclude_unset=True),
+        customer_id=user.id,
         equipment_id=equipment.id
     )
     order.total_price = (order.end_date - order.start_date).days * equipment.price_per_day
@@ -91,8 +89,8 @@ async def make_order(
     return OrderOut.model_validate(order)
 
 @router.get(
-        '', 
-        status_code=status.HTTP_200_OK, 
+        '',
+        status_code=status.HTTP_200_OK,
         response_model=list[OrderOutFull],
         summary="Смотреть свои заказы",
         description="Выводит список заказов пользователя",
@@ -116,8 +114,8 @@ async def get_orders(
     return [OrderOutFull.model_validate(order) for order in orders]
 
 @router.get(
-        '/{order_id}', 
-        status_code=status.HTTP_200_OK, 
+        '/{order_id}',
+        status_code=status.HTTP_200_OK,
         response_model=OrderOutFull,
         summary="Найти заказ по ID",
         description="Выводит заказ по введеному ID. Найденный заказ доступен только заказчику, владельцу оборудования и администратору",
@@ -127,7 +125,7 @@ async def get_orders(
             403: {"description": "Заказ недоступен"},
             404: {"description": "Заказ не найден"},
             422: {"description": "Ошибка валидации данных"}
-        }      
+        }
 )
 async def get_order_by_id(
     order: Order = Depends(get_order)
@@ -135,7 +133,7 @@ async def get_order_by_id(
     return OrderOutFull.model_validate(order)
 
 @router.delete(
-        '/{order_id}', 
+        '/{order_id}',
         status_code=status.HTTP_204_NO_CONTENT,
         summary="Удалить заказ",
         description="Удаляет заказ по ID. Доступно заказчику",

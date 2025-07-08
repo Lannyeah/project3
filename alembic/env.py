@@ -1,14 +1,14 @@
 import asyncio
+import os
 from logging.config import fileConfig
 
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from dotenv import load_dotenv
 from sqlalchemy import pool
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from app.models import Base
 
-import os
-from dotenv import load_dotenv
 load_dotenv()
 
 database_url = os.getenv("DATABASE_URL")
@@ -71,7 +71,7 @@ def do_run_migrations(connection):
     )
     with context.begin_transaction():
         context.run_migrations()
-        
+
 async def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -88,7 +88,7 @@ async def run_migrations_online() -> None:
 
     async with connectable.connect() as async_conn:
         await async_conn.run_sync(do_run_migrations)
-    
+
     await connectable.dispose()
 
 if context.is_offline_mode():

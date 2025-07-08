@@ -1,9 +1,9 @@
-from app import app
-from dotenv import load_dotenv
-load_dotenv()
 import os
-import uvicorn
 
+import uvicorn
+from dotenv import load_dotenv
+
+load_dotenv()
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))

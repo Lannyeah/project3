@@ -1,22 +1,20 @@
-from fastapi import APIRouter, Depends, Response, HTTPException, status, Cookie, Body
-
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-
-from app.database import get_session
-from app.models import User, Session
-from app.schemas import UserOut, UserCreate
-from app.supfunctions import get_current_user
-
-import bcrypt
 import secrets
 
+import bcrypt
+from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Response, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_session
+from app.models import Session, User
+from app.schemas import UserCreate, UserOut
+from app.supfunctions import get_current_user
 
 router = APIRouter()
 
 @router.post(
-        '/register', 
-        status_code=status.HTTP_201_CREATED, 
+        '/register',
+        status_code=status.HTTP_201_CREATED,
         response_model=UserOut,
         summary="Создать аккаунт",
         description="Создает пользователя",
@@ -43,7 +41,7 @@ async def register_user(
     return UserOut.model_validate(user)
 
 @router.post(
-        '/login', 
+        '/login',
         status_code=status.HTTP_200_OK,
         summary="Авторизоваться",
         description="Авторизация пользователя",
@@ -85,15 +83,15 @@ async def login(
     session.add(db_session)
     try:
         await session.commit()
-    except Exception as e: 
+    except Exception:
         await session.rollback()
         raise
     response.set_cookie(key="session_id", value=session_id, httponly=True)
     return {"message": "Успешно авторизовано"}
 
 @router.get(
-        '/me', 
-        status_code=status.HTTP_200_OK, 
+        '/me',
+        status_code=status.HTTP_200_OK,
         response_model=UserOut,
         summary="Показать мои данные",
         description="Возвращает данные об авторизованном пользователе",
